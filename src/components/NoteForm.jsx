@@ -10,13 +10,15 @@ import { MicIcon, StopIcon, BellIcon, PlusIcon, CloseIcon, FolderIcon } from './
 // دستورهای پایان جمله که یادداشت رو خودکار ذخیره می‌کنن: «... اضافه کن»
 const CMD = /[\s،,.!؟?]*(?:اضافه\s*(?:کن|بکن|کنید)|ثبت\s*(?:کن|بکن)|ذخیره\s*(?:کن|بکن))[\s.!؟?]*$/
 
-// داخل اپ اندروید تشخیص گفتار بومی، روی وب همون Web Speech API
-const useVoice = isNative() ? useVoiceNative : useVoiceWeb
-
+// انتخاب هوک در زمان رندر انجام می‌شود، نه هنگام بارگذاری ماژول؛
+// در بعضی WebViewها پل Capacitor هنگام ارزیابی اولیه‌ی فایل هنوز آماده نیست.
 const QUICK = ['۱۰ دقیقه دیگه', 'نیم ساعت دیگه', '۱ ساعت دیگه', '۳ ساعت دیگه', 'فردا ساعت ۸']
 
 export default function NoteForm({ onAdd, notify, packs, activePack, onCreatePack }) {
-  const [text, setText] = useState(() => (isNative() ? readDraft() : ''))
+  const native = isNative()
+  // پلتفرم پس از راه‌اندازی ثابت است؛ انتخاب هوک را به رندر موکول می‌کنیم.
+  const useVoice = native ? useVoiceNative : useVoiceWeb
+  const [text, setText] = useState(() => (native ? readDraft() : ''))
   const [when, setWhen] = useState('')
   const [dt, setDt] = useState('')
   const [panel, setPanel] = useState(false)
@@ -24,7 +26,7 @@ export default function NoteForm({ onAdd, notify, packs, activePack, onCreatePac
 
   // اندروید: پیش‌نویس متن در حال تایپ ذخیره می‌شه (با بسته شدن اپ از بین نره)
   useEffect(() => {
-    if (isNative()) writeDraft(text)
+    if (native) writeDraft(text)
   }, [text])
 
   // اندروید: دکمه‌ی Back اول پنل یادآور رو می‌بنده

@@ -36,6 +36,8 @@
 همین کد React داخل یه اپ اندروید قرار می‌گیره. APK با GitHub Actions ساخته می‌شه (Android Studio لازم نیست).
 
 ### ساخت APK
+> نکته: `package-lock.json` این بسته از نسخه‌ی قدیمی باقی مانده است؛ هنگام `npm install` در گردش‌کار GitHub با وابستگی‌های فعلی `package.json` همگام می‌شود. برای ساخت محلی نیز از `npm install` استفاده کن، نه `npm ci`.
+
 1. یه مخزن GitHub بساز و کل این پوشه رو (همراه `.github` و `debug.keystore`) پوش کن.
 2. تب **Actions** ← **Build Android APK** ← **Run workflow** (با هر پوش روی `main` هم خودکار اجرا می‌شه).
 3. بعد از تموم شدن، پایین صفحه‌ی اجرا، بخش **Artifacts** فایل `notes-app-debug-apk` رو دانلود کن، از زیپ دربیار و `app-debug.apk` رو روی گوشی نصب کن (باید «نصب از منابع ناشناس» رو برای مرورگر/مدیر فایل روشن کنی).

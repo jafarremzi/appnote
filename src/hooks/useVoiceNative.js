@@ -85,27 +85,34 @@ export default function useVoiceNative({ onFinal }) {
       if (!available) return fail('unsupported')
       let perm = await p.checkPermissions()
       if (perm.speechRecognition !== 'granted') perm = await p.requestPermissions()
-      dlog('voice', `available=${available} permission=${perm.speechRecognition}`)
+      dlog('voice', `native speech plugin ready; available=${available}; permission=${perm.speechRecognition}`)
       if (perm.speechRecognition !== 'granted') return fail('denied_native')
 
       activeRef.current = true
       handlesRef.current = [
         await p.addListener('partialResults', (d) => {
-          const t = d?.matches?.[0] || ''
-          if (t) { lastRef.current = t; setInterim(t) }
+          const t = Array.isArray(d?.matches) ? d.matches.find((x) => typeof x === 'string' && x.trim()) : ''
+          if (t) {
+            lastRef.current = t.trim()
+            setInterim(t.trim())
+            dlog('voice', `speech result received (${t.trim().length} chars)`)
+          }
         }),
         await p.addListener('listeningState', (d) => {
           // کمی صبر می‌کنیم تا آخرین نتیجه‌ی تشخیص هم برسه
-          if (d?.status === 'stopped') later(finish, 400)
+          dlog('voice', `listeningState=${d?.status || 'unknown'}`)
+          if (d?.status === 'stopped') later(finish, 900)
         }),
       ]
       setListening(true)
       later(() => stop(), MAX_MS)
-      const r = await p.start({ language: 'fa-IR', maxResults: 1, partialResults: true, popup: false })
+      dlog('voice', 'starting Android speech recognition (fa-IR)')
+      const r = await p.start({ language: 'fa-IR', maxResults: 3, partialResults: true, popup: false })
       // بعضی نسخه‌ها/حالت‌ها نتیجه‌ی نهایی رو از خود start برمی‌گردونن
       const m = r?.matches?.[0]
       if (m) { lastRef.current = m; setInterim(m); later(finish, 0) }
     } catch (e) {
+      dlog('voice', `start/error: ${e?.message || String(e)}`)
       fail('unknown', e?.message || String(e))
     }
   }
